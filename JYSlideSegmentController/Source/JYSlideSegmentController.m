@@ -596,9 +596,16 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   rect.origin.x = rect.size.width * index;
   CGPoint offset = CGPointMake(rect.origin.x, rect.origin.y);
   [UIView animateWithDuration:0.2 animations:^{
-    CGRect frame = self.indicatorBgView.frame;
-    frame.origin.x = self.itemWidth * index;
+    // 为了适应itemWidth不一样的情况，每次需要重新计算indicatorBgView 和 indicator 和frame。
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+    CGRect itemFrame = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath].frame;
+    CGRect frame = CGRectMake(itemFrame.origin.x,
+                              self.segmentBar.frame.size.height - self.indicatorHeight,
+                              itemFrame.size.width, self.indicatorHeight);
     self.indicatorBgView.frame = frame;
+    CGFloat indicatorWidth = itemFrame.size.width - self.indicatorInsets.left - self.indicatorInsets.right;
+    CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
+    self.indicator.frame = indicatorFrame;
   } completion:^(BOOL finished) {
     [self.slideView setContentOffset:offset animated:animated];
     if ([self.delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
